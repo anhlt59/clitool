@@ -1,6 +1,6 @@
 from clitool.services.base import AwsService
 from clitool.types.base import Tag
-from clitool.types.secretsmanager import SecretFilterCondition, SecretKey, SecretKeys
+from clitool.types.secrets_manager import SecretFilterCondition, SecretKey, SecretKeys
 
 
 class SecretsManagerService(AwsService):

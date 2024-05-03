@@ -60,7 +60,7 @@ def main():
     cli.add_command(commands.s3)
     cli.add_command(commands.lambda_)
     cli.add_command(commands.cloudformation)
-    cli.add_command(commands.secretsmanager)
+    cli.add_command(commands.secrets_manager)
     add_default_command(cli)
     cli()
 

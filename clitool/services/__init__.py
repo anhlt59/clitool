@@ -3,7 +3,7 @@ from .dynamodb import DynamoDBService
 from .iam import IamService
 from .lambda_ import LambdaService
 from .s3 import S3Service
-from .secretsmanager import SecretsManagerService
+from .secrets_manager import SecretsManagerService
 from .session import SessionService
 
 __all__ = [

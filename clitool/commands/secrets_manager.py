@@ -5,7 +5,7 @@ from click_shell import shell
 from clitool.commands.base import validate_required_value
 from clitool.console import console
 from clitool.services import SecretsManagerService, SessionService
-from clitool.types.secretsmanager import SecretFilterCondition, SecretTable
+from clitool.types.secrets_manager import SecretFilterCondition, SecretTable
 from clitool.utils import rich_diff
 
 session = SessionService()
