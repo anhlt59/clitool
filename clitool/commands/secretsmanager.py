@@ -27,10 +27,10 @@ def cli():
 def list_(name: str, tag_key: str, tag_value: str, all_: str):
     """List secret keys."""
     filter_ = SecretFilterCondition(
-        prefix_name=[name] if name else None,
-        prefix_tag_key=[tag_key] if tag_key else None,
-        prefix_tag_value=[tag_value] if tag_value else None,
-        all_attributes=[all_] if all_ else None,
+        prefix_name=name,
+        prefix_tag_key=tag_key,
+        prefix_tag_value=tag_value,
+        all_attributes=all_,
     )
     with console.status("Listing secret keys ...", spinner="dots"):
         try:
@@ -80,7 +80,7 @@ def upsert(secret_id: str, secret_string: str):
                     except Exception as e:
                         console.log(f"Failed to update key: {e}", style="red")
                     else:
-                        console.print(secret.extract(), f"Updated [b]{secret_id}[b] successfully.", style="green")
+                        console.print(secret.extract(), f"Updated [b]{secret_id}[/b] successfully.")
         else:
             console.log("No changes detected.")
 
@@ -92,4 +92,4 @@ def upsert(secret_id: str, secret_string: str):
                 except Exception as e:
                     console.log(f"Failed to update key: {e}", style="red")
                 else:
-                    console.print(secret.extract(), f"Created [b]{secret_id}[b] successfully.", style="green")
+                    console.print(secret.extract(), f"Created [b]{secret_id}[/b] successfully.")

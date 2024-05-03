@@ -17,10 +17,10 @@ class SecretKey(CliItem):
 
 @dataclass
 class SecretFilterCondition:
-    prefix_name: list[str] | None = None
-    prefix_tag_key: list[str] | None = None
-    prefix_tag_value: list[str] | None = None
-    all_attributes: list[str] | None = None
+    prefix_name: str | None = None
+    prefix_tag_key: str | None = None
+    prefix_tag_value: str | None = None
+    all_attributes: str | None = None
 
     @property
     def filters(self):
