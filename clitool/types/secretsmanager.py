@@ -2,15 +2,17 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from clitool.types import CliItem, CliItems, CliTable
+from clitool.types.base import Tag
 
 
 @dataclass
 class SecretKey(CliItem):
     name: str
-    arn: str
-    version_id: str = ""
-    secret_string: str = ""
+    arn: str | None = None
+    version_id: str | None = None
+    secret_string: str | None = None
     created_date: datetime | None = None
+    tags: list[Tag] | None = None
 
 
 @dataclass

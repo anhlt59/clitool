@@ -1,10 +1,12 @@
 import click
+from botocore.errorfactory import ClientError
 from click_shell import shell
 
 from clitool.commands.base import validate_required_value
 from clitool.console import console
 from clitool.services import SecretsManagerService, SessionService
 from clitool.types.secretsmanager import SecretFilterCondition, SecretTable
+from clitool.utils import rich_diff
 
 session = SessionService()
 secretsmanager = SecretsManagerService(session)
@@ -32,22 +34,62 @@ def list_(name: str, tag_key: str, tag_value: str, all_: str):
     )
     with console.status("Listing secret keys ...", spinner="dots"):
         try:
-            secrets = secretsmanager.list(filter_)
+            secrets = secretsmanager.list_secrets(filter_)
         except Exception as e:
             console.log(f"Failed to get stack: {e}", style="red")
         else:
-            secret_table = SecretTable(items=secrets.items, columns=["name", "arn", "created_date"])
+            secret_table = SecretTable(items=secrets.items, columns=["name", "arn", "created_date", "tags"])
             console.print_table(secret_table)
 
 
 @cli.command()
 @click.argument("secret_id", type=str, required=False, default="", callback=validate_required_value)
 def get(secret_id: str):
-    """Get a secretsmanager keys."""
+    """Get a secretsmanager key."""
     with console.status(f"Getting [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
         try:
-            secret = secretsmanager.get(secret_id)
+            secret = secretsmanager.get_secret(secret_id)
         except Exception as e:
             console.log(f"Failed to get stack: {e}", style="red")
         else:
             console.print(secret.extract())
+
+
+@cli.command()
+@click.argument("secret_id", type=str, required=False, default="", callback=validate_required_value)
+@click.argument("secret_string", type=str, required=False, default="", callback=validate_required_value)
+def upsert(secret_id: str, secret_string: str):
+    """Create or update a secretsmanager key."""
+    with console.status(f"Waiting for checking [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+        try:
+            existing_secret = secretsmanager.get_secret(secret_id)
+        except Exception as e:
+            if isinstance(e, ClientError) and e.response["Error"]["Code"] == "ResourceNotFoundException":
+                existing_secret = None
+            else:
+                console.log(f"Failed to create/update key: {e}", style="red")
+                raise click.Abort()
+
+    if existing_secret:
+        if diff := rich_diff(existing_secret.secret_string, secret_string):
+            console.print(diff)
+            if click.confirm(f"Do you want to update the secret {secret_id}?", abort=True, default=True):
+                with console.status(f"Updating [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+                    try:
+                        secret = secretsmanager.update_secret(secret_id, secret_string)
+                    except Exception as e:
+                        console.log(f"Failed to update key: {e}", style="red")
+                    else:
+                        console.print(secret.extract(), f"Updated [b]{secret_id}[b] successfully.", style="green")
+        else:
+            console.log("No changes detected.")
+
+    else:
+        if click.confirm("Do you want to create a new secret?", abort=True, default=True):
+            with console.status(f"Creating [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+                try:
+                    secret = secretsmanager.create_secret(secret_id, secret_string)
+                except Exception as e:
+                    console.log(f"Failed to update key: {e}", style="red")
+                else:
+                    console.print(secret.extract(), f"Created [b]{secret_id}[b] successfully.", style="green")

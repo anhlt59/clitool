@@ -48,3 +48,9 @@ class CliItems(ABC):
 
     def append(self, item: CliItemT):
         self.items.append(item)
+
+
+@dataclass
+class Tag:
+    key: str
+    value: str

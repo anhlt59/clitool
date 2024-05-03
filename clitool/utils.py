@@ -1,8 +1,11 @@
 import os
 import re
+from difflib import unified_diff
 from itertools import islice
 from subprocess import PIPE, Popen
 from typing import Any, Iterable
+
+from rich.text import Text
 
 mfa_compiler = re.compile(r"(^arn:aws:iam::\d+:mfa/[\w\-_]+$)|(^\d{6,}$)")
 
@@ -45,3 +48,27 @@ def list_files(directory: str) -> Iterable[str]:
     for root, dirs, files in os.walk(directory):
         for file in files:
             yield os.path.join(root, file)
+
+
+def rich_diff(text1: str, text2: str) -> Text | None:
+    """
+    Compare two texts and return the difference.
+    :param text1: text 1
+    :param text2: text 2
+    :return: difference if any or None
+    """
+    result = Text()
+    diff = list(unified_diff(text1.splitlines(), text2.splitlines()))
+
+    if len(diff) == 0:
+        return None
+
+    for line in diff:
+        line = line.strip("\n")
+        if line.startswith("-"):
+            result.append(f"{line}\n", style="red")
+        elif line.startswith("+"):
+            result.append(f"{line}\n", style="green")
+        else:
+            result.append(f"{line}\n", style="white")
+    return result
