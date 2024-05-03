@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Create Lambda function
+
+Parameters:
+  FunctionRole:
+    Type: String
+    Default: cli-
+
+Resources:
+  CliFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.handler
+      Runtime: python3.12
+      Role:
+        Ref: LambdaRole
+      FunctionName: cli_function
