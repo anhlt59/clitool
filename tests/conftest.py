@@ -37,6 +37,12 @@ def cfn_client():
         yield boto3.client("cloudformation", region_name=REGION)
 
 
+@pytest.fixture
+def secretsmanager_client():
+    with mock_aws():
+        yield boto3.client("secretsmanager", region_name=REGION)
+
+
 # resources -------------------------------------------------------------------
 @pytest.fixture
 def cli_user(iam_client):

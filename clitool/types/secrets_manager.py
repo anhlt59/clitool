@@ -11,8 +11,9 @@ class SecretKey(CliItem):
     arn: str | None = None
     version_id: str | None = None
     secret_string: str | None = None
-    created_date: datetime | None = None
     tags: list[Tag] | None = None
+    created_date: datetime | None = None
+    deleted_date: datetime | None = None
 
 
 @dataclass

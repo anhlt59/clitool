@@ -1,5 +1,7 @@
 # AWS CLI tools
 
+![Coverage Status](docs/images/coverage.svg)
+
 ## Usage
 
 #### Requirements

@@ -93,3 +93,24 @@ def upsert(secret_id: str, secret_string: str):
                     console.log(f"Failed to update key: {e}", style="red")
                 else:
                     console.print(secret.extract(), f"Created [b]{secret_id}[/b] successfully.")
+
+
+@cli.command()
+@click.argument("secret_id", type=str, required=False, default="", callback=validate_required_value)
+def delete(secret_id: str):
+    """Delete a secretsmanager key."""
+    try:
+        secret = secretsmanager.get_secret(secret_id)
+    except Exception as e:
+        console.log(f"Failed to get secret: {e}", style="red")
+        raise click.Abort()
+    console.print(secret.extract())
+
+    if click.confirm(f"Are you sure you want to delete the secret {secret_id}?", abort=True, default=False):
+        with console.status(f"Deleting [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+            try:
+                secretsmanager.delete_secret(secret_id)
+            except Exception as e:
+                console.log(f"Failed to delete key: {e}", style="red")
+            else:
+                console.print(f"Deleted [b]{secret_id}[/b] successfully.")

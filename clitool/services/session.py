@@ -13,7 +13,7 @@ class SessionService(metaclass=SingletonMeta):
 
     def __init__(self, profile_name: str = AWS_DEFAULT_PROFILE):
         self.profile = self.get_profile(profile_name)
-        self.session = boto3.Session(profile_name=self.profile.name)
+        self.session = boto3.Session(profile_name=self.profile.name, region_name=self.profile.region)
 
     def client(self, *args, **kwargs) -> boto3.client:
         return self.session.client(*args, **kwargs)
@@ -55,7 +55,7 @@ class SessionService(metaclass=SingletonMeta):
     def switch_profile(self, name: str) -> Profile:
         if self.profile.name != name:
             self.profile = self.get_profile(name)
-            self.session = boto3.Session(profile_name=name)
+            self.session = boto3.Session(profile_name=name, region_name=self.profile.region)
         return self.profile
 
     def set_credentials(self, credentials: Credentials) -> Profile:
@@ -116,3 +116,8 @@ class SessionService(metaclass=SingletonMeta):
         execute_command(f"aws configure set aws_secret_access_key {aws_secret_access_key} --profile {name}")
         if aws_session_token:
             execute_command(f"aws configure set aws_session_token {aws_session_token} --profile {name}")
+
+    def change_region(self, region: str) -> Profile:
+        self.profile.region = region
+        self.session = boto3.Session(profile_name=self.profile.name, region_name=region)
+        return self.profile
