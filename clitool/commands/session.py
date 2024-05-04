@@ -1,6 +1,7 @@
 import click
 from click_shell import shell
 
+from clitool.commands.base import validate_required_value
 from clitool.console import console
 from clitool.services import SessionService
 from clitool.settings import AWS_DEFAULT_SESSION_PROFILE
@@ -40,8 +41,8 @@ def cli():
     pass
 
 
-@cli.command("list", help="List all available profiles on your system.")
-def list_():
+@cli.command(help="List all available profiles on your system.")
+def list_profiles():
     """List all available profiles on your system."""
     with console.status("Listing profiles ...", spinner="dots"):
         profiles = session.list_profiles()
@@ -50,7 +51,7 @@ def list_():
 
 
 @cli.command(help="Get current profile.")
-def current():
+def current_profile():
     """Get a profile."""
     with console.status("Get current profile ...", spinner="dots"):
         if session.profile.account is None:
@@ -60,7 +61,7 @@ def current():
 
 @cli.command(help="Get a profile by name.")
 @click.argument("name", required=False, default="", callback=validate_profile)
-def get(name):
+def get_profile(name):
     """Get a profile.
     :param name: Profile name
     """
@@ -75,7 +76,7 @@ def get(name):
 
 @cli.command(help="Switch to a profile.")
 @click.argument("name", default=None, required=False, callback=validate_profile)
-def switch(name: str):
+def switch_profile(name: str):
     """Switch to a profile.
     :param name: Profile name
     """
@@ -95,7 +96,7 @@ def switch(name: str):
 
 
 @cli.command(help="Refresh the session token.")
-def refresh():
+def refresh_token():
     """Refresh the session token."""
     credentials = session.profile.credentials
     if credentials.aws_expiration is None:
@@ -117,3 +118,21 @@ def refresh():
             session.set_credentials(credentials)
             session.store_aws_config_file(session.profile, AWS_DEFAULT_SESSION_PROFILE)
             console.log(f"Profile [b]{AWS_DEFAULT_SESSION_PROFILE}[/b] has been refreshed", style="green")
+
+
+@cli.command(help="Change region.")
+@click.argument("region", default="", required=False, callback=validate_required_value)
+def change_region(region: str):
+    """Change region."""
+    # if the current region is the same with passed region, do nothing
+    if session.profile.region == region:
+        console.log(f"Already in {region} region", style="yellow")
+    else:
+        with console.status("Changing region ...", spinner="dots"):
+            try:
+                profile = session.change_region(region)
+            except Exception as e:
+                console.log(f"Failed to change region: {e}", style="red")
+            else:
+                console.print(profile.extract())
+                console.log(f"Region changed to {region}", style="green")

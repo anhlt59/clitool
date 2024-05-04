@@ -2,7 +2,7 @@ import boto3
 
 from clitool.base import SingletonMeta
 from clitool.console import console
-from clitool.settings import AWS_DEFAULT_PROFILE, AWS_IGNORED_PROFILES
+from clitool.settings import AWS_DEFAULT_PROFILE, AWS_IGNORED_PROFILES, AWS_REGIONS
 from clitool.types.session import Credentials, Profile, Profiles
 from clitool.utils import execute_command, mfa_compiler
 
@@ -118,6 +118,18 @@ class SessionService(metaclass=SingletonMeta):
             execute_command(f"aws configure set aws_session_token {aws_session_token} --profile {name}")
 
     def change_region(self, region: str) -> Profile:
+        # validate the passed region
+        if region not in AWS_REGIONS:
+            raise ValueError(f"Region {region} is not available")
+
+        response = self.session.client("account").list_regions(
+            RegionOptStatusContains=["ENABLED", "ENABLED_BY_DEFAULT"]
+        )
+        enabled_regions = {item["RegionName"] for item in response.get("Regions", [])}
+        if region not in enabled_regions:
+            raise ValueError(f"Region {region} is not enabled")
+
+        # change the region
         self.profile.region = region
         self.session = boto3.Session(profile_name=self.profile.name, region_name=region)
         return self.profile

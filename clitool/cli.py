@@ -18,9 +18,7 @@ def install_context(ctx: click.Context):
         session.switch_profile(profile.name)
         # if credentials has been expired, refresh it
         if profile.credentials.is_expired():
-            from clitool.commands.session import refresh
-
-            ctx.invoke(refresh)
+            ctx.invoke(commands.session.refresh_token)
         else:
             session.set_credentials(profile.credentials)
 
