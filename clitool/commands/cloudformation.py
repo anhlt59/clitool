@@ -3,8 +3,9 @@ import time
 import click
 from click_shell import shell
 from rich.live import Live
+from rich.text import Text
 
-from clitool.commands.base import validate_required_value
+from clitool.commands.base import validate_file, validate_required_value
 from clitool.console import console
 from clitool.services import CloudFormationService, SessionService
 from clitool.types.cloudformation import CfnStackTable
@@ -22,7 +23,7 @@ def cli():
 
 @cli.command("list")
 @click.option("-p", "--prefix", help="Stack prefix", type=str, default=None)
-def list_(prefix: str):
+def list_stacks(prefix: str):
     """List cloudformation stacks."""
     with console.status("Listing cloudformation stack ...", spinner="dots"):
         try:
@@ -36,7 +37,7 @@ def list_(prefix: str):
 
 @cli.command()
 @click.argument("name", default="", required=False, callback=validate_required_value)
-def get(name: str):
+def get_stack(name: str):
     """Describe a cloudformation stack."""
     with console.status(f"Getting [b][cyan]{name}[/cyan][/b] stack ...", spinner="dots"):
         try:
@@ -50,7 +51,7 @@ def get(name: str):
 @cli.command()
 @click.argument("name", default="", required=False, callback=validate_required_value)
 @click.option("-t", "--timeout", help="Monitoring timeout", type=int, default=600)
-def monitor(name: str, timeout: int):
+def monitor_stack(name: str, timeout: int):
     """Monitor a cloudformation stack."""
     with console.status(
         f"Monitoring [b][cyan]{name}[/cyan][/b] stack. [white]Press Ctrl+C to stop[/white]", spinner="dots"
@@ -69,3 +70,24 @@ def monitor(name: str, timeout: int):
                     timeout -= 1
             else:
                 raise click.Abort("Timed out!!!")
+
+
+@cli.command()
+@click.argument("path", default="", required=False, callback=validate_file)
+def validate_template(path: str):
+    """Validate cloudformation template."""
+    with console.status(f"Validating [b][cyan]{path}[/cyan][/b] template ...", spinner="dots"):
+        try:
+            errors = cloudformation.validate_template(path)
+        except Exception as e:
+            console.log(f"Failed to validate template: {e}", style="red")
+        else:
+            text = Text()
+            for error in errors:
+                if error.rule.severity == "error":
+                    text.append(f"\n{error}", style="red")
+                elif error.rule.severity == "warning":
+                    text.append(f"\n{error}", style="yellow")
+                else:
+                    text.append(f"\n{error}", style="white")
+            console.print(text)

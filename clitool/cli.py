@@ -15,7 +15,7 @@ def install_context(ctx: click.Context):
 
     if profile_data := cache.get("profile"):
         profile = Profile.deserialize(profile_data)
-        session.switch_profile(profile.name)
+        session.switch_profile(profile.name, profile.region)
         # if credentials has been expired, refresh it
         if profile.credentials.is_expired():
             ctx.invoke(commands.session.refresh_token)

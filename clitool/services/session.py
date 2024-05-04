@@ -11,9 +11,8 @@ class SessionService(metaclass=SingletonMeta):
     profile: Profile
     session: boto3.Session
 
-    def __init__(self, profile_name: str = AWS_DEFAULT_PROFILE):
-        self.profile = self.get_profile(profile_name)
-        self.session = boto3.Session(profile_name=self.profile.name, region_name=self.profile.region)
+    def __init__(self, profile_name: str = AWS_DEFAULT_PROFILE, region_name: str | None = None):
+        self.switch_profile(profile_name, region_name)
 
     def client(self, *args, **kwargs) -> boto3.client:
         return self.session.client(*args, **kwargs)
@@ -21,8 +20,9 @@ class SessionService(metaclass=SingletonMeta):
     def resource(self, *args, **kwargs) -> boto3.resource:
         return self.session.resource(*args, **kwargs)
 
-    def get_profile(self, name: str = AWS_DEFAULT_PROFILE, lazy=True) -> Profile:
-        session = boto3.Session(profile_name=name)
+    @staticmethod
+    def get_profile(profile_name: str = AWS_DEFAULT_PROFILE, region_name: str | None = None, lazy=True) -> Profile:
+        session = boto3.Session(profile_name=profile_name, region_name=region_name)
         credentials = session.get_credentials()
         profile = Profile(
             name=session.profile_name,
@@ -52,10 +52,9 @@ class SessionService(metaclass=SingletonMeta):
                     profiles.append(profile)
         return profiles
 
-    def switch_profile(self, name: str) -> Profile:
-        if self.profile.name != name:
-            self.profile = self.get_profile(name)
-            self.session = boto3.Session(profile_name=name, region_name=self.profile.region)
+    def switch_profile(self, name: str, region_name: str | None = None) -> Profile:
+        self.profile = self.get_profile(name, region_name)
+        self.session = boto3.Session(profile_name=name, region_name=region_name or self.profile.region)
         return self.profile
 
     def set_credentials(self, credentials: Credentials) -> Profile:
@@ -105,7 +104,8 @@ class SessionService(metaclass=SingletonMeta):
         else:
             raise Exception("Failed to assume role")
 
-    def store_aws_config_file(self, profile: Profile, name: str = AWS_DEFAULT_PROFILE):
+    @staticmethod
+    def store_aws_config_file(profile: Profile, name: str = AWS_DEFAULT_PROFILE):
         aws_access_key_id = profile.credentials.aws_access_key_id
         aws_secret_access_key = profile.credentials.aws_secret_access_key
         aws_session_token = profile.credentials.aws_session_token

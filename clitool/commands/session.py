@@ -54,8 +54,7 @@ def list_profiles():
 def current_profile():
     """Get a profile."""
     with console.status("Get current profile ...", spinner="dots"):
-        if session.profile.account is None:
-            session.profile = session.get_profile(session.profile.name, False)
+        session.profile = session.get_profile(session.profile.name, region_name=session.profile.region, lazy=False)
         console.print(session.profile.extract())
 
 
@@ -67,7 +66,7 @@ def get_profile(name):
     """
     with console.status(f"Get [b][cyan]{name}[/cyan][/b] profile...", spinner="dots"):
         try:
-            profile = session.get_profile(name, False)
+            profile = session.get_profile(name, lazy=False)
         except Exception as e:
             console.log(f"Profile {name} is inactive: {e}", style="red")
         else:
@@ -75,7 +74,7 @@ def get_profile(name):
 
 
 @cli.command(help="Switch to a profile.")
-@click.argument("name", default=None, required=False, callback=validate_profile)
+@click.argument("name", default="", required=False, callback=validate_profile)
 def switch_profile(name: str):
     """Switch to a profile.
     :param name: Profile name

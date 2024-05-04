@@ -73,7 +73,7 @@ class CloudFormationService(AwsService):
             return stack
         raise Exception(f"Stack {stack_name} not found")
 
-    def validate_template(self, template_path: str):
+    def validate_template(self, template_path: str) -> list:
         with open(template_path, "r") as file:
             template = file.read()
         return lint_all(template)
