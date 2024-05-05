@@ -1,12 +1,15 @@
+import re
+
 import click
 from click_shell import shell
 
 from clitool.commands.base import validate_required_value
 from clitool.console import console
+from clitool.constants import AWS_DEFAULT_SESSION_PROFILE
 from clitool.services import SessionService
-from clitool.settings import AWS_DEFAULT_SESSION_PROFILE
 from clitool.types.session import ProfileTable
-from clitool.utils import mfa_compiler
+
+MFA_ARN_PATTERN = r"(^arn:aws:iam::\d+:mfa/[\w\-_]+$)|(^\d{6,}$)"
 
 session = SessionService()
 
@@ -103,7 +106,7 @@ def refresh_token():
     else:
         with console.status("Refreshing session token ...", spinner="dots") as status:
             try:
-                if mfa_compiler.match(credentials.aws_arn):
+                if re.match(MFA_ARN_PATTERN, credentials.aws_arn):
                     status.stop()
                     mfa_token = click.prompt("Please enter MFA token")
                     status.start()

@@ -3,7 +3,7 @@ import pickle
 from typing import Any
 
 from clitool.base import SingletonMeta
-from clitool.settings import CACHE_FILE
+from clitool.constants import CACHE_FILE
 
 __all__ = ["cache"]
 

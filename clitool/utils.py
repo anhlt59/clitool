@@ -1,13 +1,48 @@
 import os
-import re
+import subprocess
+import sys
 from difflib import unified_diff
 from itertools import islice
-from subprocess import PIPE, Popen
-from typing import Any, Iterable
+from typing import Any, Iterable, Literal
 
 from rich.text import Text
 
-mfa_compiler = re.compile(r"(^arn:aws:iam::\d+:mfa/[\w\-_]+$)|(^\d{6,}$)")
+PROC_OUTPUT = Literal["PIPE", "STDOUT", "DEVNULL"]
+
+
+def execute_command(command: str, output: PROC_OUTPUT = "PIPE") -> str:
+    """
+    Run a command and return the output.
+    :param command: (str) command to run
+    :param output: STDOUT  - sys stdout
+                   PIPE    - return output
+                   DEVNULL - discard output
+    :return: output of the command
+    """
+    match output:
+        case "STDOUT":
+            stdout = sys.stdout
+        case "PIPE":
+            stdout = subprocess.PIPE
+        case "DEVNULL":
+            stdout = subprocess.DEVNULL
+        case _:
+            raise ValueError("Invalid output type, use 'PIPE', 'STDOUT' or 'DEVNULL'")
+
+    with subprocess.Popen(
+        command.split(),
+        stdin=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdout=stdout,
+        universal_newlines=True,
+        bufsize=-1,
+    ) as process:
+        if stdout == subprocess.DEVNULL:
+            return ""
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise Exception(f"COMMAND ERRROR: {stderr}")
+        return stdout
 
 
 def chunks(objs: Iterable[Any], limit: int) -> Iterable[list[Any]]:
@@ -21,22 +56,6 @@ def chunks(objs: Iterable[Any], limit: int) -> Iterable[list[Any]]:
         objs = iter(objs)
     while batch := list(islice(objs, limit)):
         yield batch
-
-
-def execute_command(command: str, stdin=PIPE, stdout=PIPE):
-    """
-    Run a command and return the output.
-    :param command: command to run
-    :param stdin: standard input
-    :param stdout: standard output
-    :return: output of the command
-    """
-    args = command.split()
-    with Popen(args, stdin=stdin, stdout=stdout, stderr=PIPE) as proc:
-        stdout, stderr = proc.communicate()
-        if proc.returncode != 0:
-            raise Exception(f"COMMAND ERRROR: {stderr.decode('utf-8')}")
-        return stdout
 
 
 def list_files(directory: str) -> Iterable[str]:

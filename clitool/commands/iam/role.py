@@ -1,12 +1,15 @@
+import re
+
 import click
 from click_shell import shell
 
 from clitool.cache import cache
 from clitool.console import console
+from clitool.constants import AWS_DEFAULT_SESSION_PROFILE
 from clitool.services import IamService, SessionService
-from clitool.settings import AWS_DEFAULT_SESSION_PROFILE
 from clitool.types.iam import RoleTable
-from clitool.utils import mfa_compiler
+
+MFA_ARN_PATTERN = r"(^arn:aws:iam::\d+:mfa/[\w\-_]+$)|(^\d{6,}$)"
 
 session = SessionService()
 iam = IamService(session)
@@ -41,7 +44,7 @@ def assume(arn):
             role = iam.role.get(arn)
             session.switch_profile(role.profile.name)
             console.log(f"Switched to profile [b]{role.profile.name}[/b]")
-            if mfa_compiler.match(role.arn):
+            if re.match(MFA_ARN_PATTERN, role.arn):
                 # prompt for MFA token
                 status.stop()
                 mfa_token = click.prompt("Please enter MFA token")

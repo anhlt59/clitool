@@ -1,9 +1,10 @@
+import os
 import re
 
+from clitool.constants import BASE_DIR, LAYER_ARN_PATTERN, PYTHON_SUPPORTED_RUNTIMES
 from clitool.services.base import AwsService
 from clitool.types.lambda_ import LambdaLayer, LambdaLayers, PublishLayerConfig, Runtimes
-
-layer_arn_compiler = re.compile(r"arn:aws:lambda:[a-z0-9-]+:[0-9]+:layer:(?P<name>[a-zA-Z0-9-_]+)")
+from clitool.utils import execute_command
 
 
 class LambdaLayerService(AwsService):
@@ -18,7 +19,7 @@ class LambdaLayerService(AwsService):
         layer_versions = sorted(response["LayerVersions"], key=lambda x: x["Version"], reverse=True)
         # Extracting the latest version number
         latest_version = layer_versions[0]
-        matched_reg = layer_arn_compiler.search(latest_version["LayerVersionArn"])
+        matched_reg = re.search(LAYER_ARN_PATTERN, latest_version["LayerVersionArn"])
         arn = matched_reg.string if matched_reg else latest_version["LayerVersionArn"]
         return LambdaLayer(
             name=name,
@@ -85,3 +86,16 @@ class LambdaLayerService(AwsService):
                 location=response["Content"]["Location"],
             ),
         )
+
+    @staticmethod
+    def export_python_layer(runtime: str, requirement_file: str):
+        """Export a Lambda layer to the specified directory."""
+        if not os.path.isfile(requirement_file):
+            raise FileNotFoundError(f"Requirement file not found: {requirement_file}")
+        if runtime not in PYTHON_SUPPORTED_RUNTIMES:
+            raise ValueError(f"Unsupported runtime: {runtime}")
+
+        # Run script `export_python_layer.sh` to export a Lambda layer
+        runtime = "python312" if runtime == "python3.12" else "python38-311"
+        script_path = os.path.join(BASE_DIR, "scripts", "export_python_layer.sh")
+        execute_command(f"{script_path} {runtime} {requirement_file}", "STDOUT")

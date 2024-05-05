@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime
 from typing import Type, TypeVar
 
-from clitool.settings import DATETIME_FORMAT
+from clitool.constants import DATETIME_FORMAT
 
 
 def json_serializer(obj_):

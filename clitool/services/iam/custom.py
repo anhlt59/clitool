@@ -2,8 +2,8 @@ import json
 import os
 
 from clitool.console import console
+from clitool.constants import CUSTOM_FILE
 from clitool.services.base import AwsService
-from clitool.settings import CUSTOM_FILE
 from clitool.types.iam import Role, Roles
 
 

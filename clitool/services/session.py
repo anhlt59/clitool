@@ -1,10 +1,12 @@
+import re
+
 import boto3
 
 from clitool.base import SingletonMeta
 from clitool.console import console
-from clitool.settings import AWS_DEFAULT_PROFILE, AWS_IGNORED_PROFILES, AWS_REGIONS
+from clitool.constants import AWS_DEFAULT_PROFILE, AWS_IGNORED_PROFILES, AWS_REGIONS, MFA_ARN_PATTERN
 from clitool.types.session import Credentials, Profile, Profiles
-from clitool.utils import execute_command, mfa_compiler
+from clitool.utils import execute_command
 
 
 class SessionService(metaclass=SingletonMeta):
@@ -70,7 +72,7 @@ class SessionService(metaclass=SingletonMeta):
     def assume_role(self, arn: str) -> Credentials:
         if not arn:
             raise ValueError("RoleArn is required")
-        if mfa_compiler.match(arn):
+        if re.match(MFA_ARN_PATTERN, arn):
             # self.session.client("sts").assume_role(SerialNumber=arn, TokenCode=mfa_token, RoleSessionName="clitool")
             raise ValueError("Does not support MFA serial number this version")
 

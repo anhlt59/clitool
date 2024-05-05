@@ -3,7 +3,7 @@ import logging
 import click
 from rich.logging import RichHandler
 
-from clitool.settings import LOG_FORMAT
+from clitool.constants import LOG_FORMAT
 
 logger = logging.getLogger()
 for h in logger.handlers:

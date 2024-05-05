@@ -6,7 +6,7 @@ from typing import Iterable, Type
 from rich import box
 from rich.table import Table
 
-from clitool.settings import DATETIME_FORMAT
+from clitool.constants import DATETIME_FORMAT
 
 from .base import CliItem
 

@@ -3,7 +3,7 @@ import time
 import click
 from click_shell import shell
 
-from clitool.commands.base import validate_required_value
+from clitool.commands.base import validate_file, validate_required_value
 from clitool.console import console
 from clitool.services import LambdaService, SessionService
 from clitool.types.lambda_ import LambdaLayerTable, PublishLayerConfig, Runtimes
@@ -80,3 +80,16 @@ def publish(ctx):
             console.log(f"Failed: {e}", style="red")
         else:
             console.print(layer.extract())
+
+
+@cli.command()
+@click.option("--runtime", help="Lambda runtime", default="python3.12", type=str, callback=validate_runtime)
+@click.option("--requirement", help="Requirements file", default="", type=str, callback=validate_file)
+def export(runtime, requirement):
+    """Export a Lambda layer."""
+    try:
+        lambda_.layer.export_python_layer(runtime, requirement)
+    except Exception as e:
+        console.log(f"Failed to export Lambda layer: {e}", style="red")
+    else:
+        console.print("Done! 🚀", style="green")

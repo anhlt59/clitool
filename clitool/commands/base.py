@@ -6,6 +6,7 @@ from click_shell import Shell
 from rich.tree import Tree
 
 from clitool.console import console
+from clitool.constants import BASE_DIR
 
 
 def list_commands(command: Shell, parent: Tree | None = None, max_depth: int = 0):
@@ -40,10 +41,17 @@ def validate_required_value(ctx, param, value: str = "") -> str:
     return value
 
 
-def validate_file(ctx, param, path: str = "") -> str:
+def validate_file(ctx, param, path: str = "", help_text: str = "Please enter a file path") -> str:
     path = path.strip(" \n")
+    if path == "":
+        return validate_file(ctx, param, click.prompt(help_text))
+    elif path.startswith("~"):
+        path = os.path.expanduser(path)
+    elif path.startswith(".") or path.startswith("/") is False:
+        path = os.path.join(BASE_DIR, path)
+
     if not path or os.path.isfile(path) is False:
-        click.echo(f"File path '{path}' not found")
+        click.echo(f"File '{path}' not found")
         return validate_file(ctx, param, click.prompt("Please enter a file path"))
     return path
 
