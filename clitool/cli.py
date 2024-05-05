@@ -52,12 +52,13 @@ def main():
 
     # build the command collection
     click_completion.init()
-    cli.add_command(commands.session)
-    cli.add_command(commands.iam)
-    cli.add_command(commands.dynamodb)
-    cli.add_command(commands.s3)
-    cli.add_command(commands.lambda_)
     cli.add_command(commands.cloudformation)
+    cli.add_command(commands.dynamodb)
+    cli.add_command(commands.ecr)
+    cli.add_command(commands.iam)
+    cli.add_command(commands.lambda_)
+    cli.add_command(commands.s3)
+    cli.add_command(commands.session)
     cli.add_command(commands.secrets_manager)
     add_default_command(cli)
     cli()
