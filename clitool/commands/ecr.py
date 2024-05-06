@@ -25,7 +25,7 @@ def list_repositories(prefix: str):
         try:
             repositories = ecr.list_repositories(prefix)
         except Exception as e:
-            console.log(f"Failed to list ECR repository: {e}", style="red")
+            console.log(f"🔥 Failed to list ECR repository: {e}", style="red")
         else:
             cli_table = EcrRepositoryTable(items=repositories.items)
             console.print_table(cli_table)
@@ -39,7 +39,7 @@ def list_images(repository_name: str):
         try:
             images = ecr.list_images(repository_name)
         except Exception as e:
-            console.log(f"Failed to list ECR images: {e}", style="red")
+            console.log(f"🔥 Failed to list ECR images: {e}", style="red")
         else:
             cli_table = EcrImageTable(items=images.items)
             console.print_table(cli_table)
@@ -54,6 +54,6 @@ def create_repository(repository_name: str):
         try:
             repository = ecr.create_repository(repository_name)
         except Exception as e:
-            console.log(f"Failed to create ECR repository: {e}", style="red")
+            console.log(f"🔥 Failed to create ECR repository: {e}", style="red")
         else:
-            console.print(repository)
+            console.print(repository, "🚀 Done!", style="green")

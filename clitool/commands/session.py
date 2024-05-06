@@ -11,6 +11,9 @@ from clitool.types.session import ProfileTable
 
 MFA_ARN_PATTERN = r"(^arn:aws:iam::\d+:mfa/[\w\-_]+$)|(^\d{6,}$)"
 
+# TODO: remove creation of any services, such as SessionService.
+#  Create them in the cli.py then inject them into the commands.
+#  Do the same for the other services.
 session = SessionService()
 
 
@@ -89,7 +92,7 @@ def switch_profile(name: str):
             try:
                 profile = session.switch_profile(name)
             except Exception as e:
-                console.log(f"Failed to switch {name} profile: {e}", style="red")
+                console.log(f"🔥 Failed to switch {name} profile: {e}", style="red")
                 raise click.Abort()
 
         console.log(f"Switched to {profile}")
@@ -114,7 +117,7 @@ def refresh_token():
                 else:
                     credentials = session.assume_role(credentials.aws_arn)
             except Exception as e:
-                console.log(f"Failed to refresh session token: {e}", style="red")
+                console.log(f"🔥 Failed to refresh session token: {e}", style="red")
                 raise click.Abort()
 
             session.set_credentials(credentials)
@@ -134,7 +137,7 @@ def change_region(region: str):
             try:
                 profile = session.change_region(region)
             except Exception as e:
-                console.log(f"Failed to change region: {e}", style="red")
+                console.log(f"🔥 Failed to change region: {e}", style="red")
             else:
                 console.print(profile.extract())
                 console.log(f"Region changed to {region}", style="green")

@@ -24,7 +24,7 @@ def list_(prefix: str):
         try:
             tables = dynamodb.list(prefix)
         except Exception as e:
-            console.log(f"Failed to get dynamodb tables: {e}", style="red")
+            console.log(f"🔥 Failed to list dynamodb tables: {e}", style="red")
         else:
             cli_table = DynamoDBCliTable(items=tables.items)
             console.print_table(cli_table)

@@ -25,7 +25,7 @@ def list_(name_filter: str):
     try:
         functions = lambda_.function.list(name_filter)
     except Exception as e:
-        console.log(f"Failed to invoke lambda function: {e}", style="red")
+        console.log(f"🔥 Failed to invoke lambda function: {e}", style="red")
     else:
         console.print(functions.extract())
 
@@ -39,6 +39,6 @@ def invoke(name: str, payload: dict):
         try:
             result = lambda_.function.invoke(name, payload)
         except Exception as e:
-            console.log(f"Failed to invoke lambda function: {e}", style="red")
+            console.log(f"🔥 Failed to invoke lambda function: {e}", style="red")
         else:
             console.print(result.extract())

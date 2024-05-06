@@ -54,7 +54,7 @@ def assume(arn):
                 credentials = session.assume_role(arn=role.arn)
             profile = session.set_credentials(credentials)
         except Exception as e:
-            console.log(f"Failed to get role: {e}", style="red")
+            console.log(f"🔥 Failed to get role: {e}", style="red")
         else:
             cache.set("profile", session.profile.serialize())
             console.log(f"Assumed role [b]{arn}[/b] successfully")

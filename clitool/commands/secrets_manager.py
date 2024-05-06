@@ -36,7 +36,7 @@ def list_(name: str, tag_key: str, tag_value: str, all_: str):
         try:
             secrets = secretsmanager.list_secrets(filter_)
         except Exception as e:
-            console.log(f"Failed to get stack: {e}", style="red")
+            console.log(f"🔥 Failed to list secret keys: {e}", style="red")
         else:
             secret_table = SecretTable(items=secrets.items, columns=["name", "arn", "created_date", "tags"])
             console.print_table(secret_table)
@@ -50,7 +50,7 @@ def get(secret_id: str):
         try:
             secret = secretsmanager.get_secret(secret_id)
         except Exception as e:
-            console.log(f"Failed to get stack: {e}", style="red")
+            console.log(f"🔥 Failed to get secret key: {e}", style="red")
         else:
             console.print(secret.extract())
 
@@ -67,7 +67,7 @@ def upsert(secret_id: str, secret_string: str):
             if isinstance(e, ClientError) and e.response["Error"]["Code"] == "ResourceNotFoundException":
                 existing_secret = None
             else:
-                console.log(f"Failed to create/update key: {e}", style="red")
+                console.log(f"🔥 Failed to create/update key: {e}", style="red")
                 raise click.Abort()
 
     if existing_secret:
@@ -78,9 +78,9 @@ def upsert(secret_id: str, secret_string: str):
                 try:
                     secret = secretsmanager.update_secret(secret_id, secret_string)
                 except Exception as e:
-                    console.log(f"Failed to update key: {e}", style="red")
+                    console.log(f"🔥 Failed to update key: {e}", style="red")
                 else:
-                    console.print(secret.extract(), f"Updated [b]{secret_id}[/b] successfully.")
+                    console.print(secret.extract(), f"✅ Updated [b]{secret_id}[/b] successfully.")
         else:
             console.log("No changes detected.")
 
@@ -90,9 +90,9 @@ def upsert(secret_id: str, secret_string: str):
             try:
                 secret = secretsmanager.create_secret(secret_id, secret_string)
             except Exception as e:
-                console.log(f"Failed to update key: {e}", style="red")
+                console.log(f"🔥 Failed to update key: {e}", style="red")
             else:
-                console.print(secret.extract(), f"Created [b]{secret_id}[/b] successfully.")
+                console.print(secret.extract(), f"🚀 Created [b]{secret_id}[/b] successfully.")
 
 
 @cli.command()
@@ -102,7 +102,7 @@ def delete(secret_id: str):
     try:
         secret = secretsmanager.get_secret(secret_id)
     except Exception as e:
-        console.log(f"Failed to get secret: {e}", style="red")
+        console.log(f"🔥 Failed to get secret: {e}", style="red")
         raise click.Abort()
     console.print(secret.extract())
 
@@ -111,6 +111,6 @@ def delete(secret_id: str):
         try:
             secretsmanager.delete_secret(secret_id)
         except Exception as e:
-            console.log(f"Failed to delete key: {e}", style="red")
+            console.log(f"🔥 Failed to delete key: {e}", style="red")
         else:
-            console.print(f"Deleted [b]{secret_id}[/b] successfully.")
+            console.print(f"✅ Deleted [b]{secret_id}[/b] successfully.")

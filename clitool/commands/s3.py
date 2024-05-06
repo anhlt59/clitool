@@ -27,7 +27,7 @@ def list_buckets(prefix: str):
         try:
             buckets = s3.bucket.list(prefix)
         except Exception as e:
-            console.log(f"Failed to get role: {e}", style="red")
+            console.log(f"🔥 Failed to list buckets: {e}", style="red")
         else:
             bucket_table = S3BucketTable(items=buckets.items)
             console.print_table(bucket_table)
@@ -42,7 +42,7 @@ def list_objects(bucket: str, prefix: str):
         try:
             objs = s3.object.list(bucket, prefix)
         except Exception as e:
-            console.log(f"Failed to get role: {e}", style="red")
+            console.log(f"🔥 Failed to list objects: {e}", style="red")
         else:
             console.print(objs.extract())
 
@@ -65,7 +65,7 @@ def upload_folder(bucket: str, prefix: str, directory: str):
                         console.log("Stopped uploading files", style="yellow")
                         raise click.Abort()
                     except Exception as e:
-                        console.log(f"Failed to upload files: {e}", style="red")
+                        console.log(f"🔥 Failed to upload files: {e}", style="red")
                         raise click.Abort()
                     else:
                         console.log(f"{s3_obj.bucket}:{s3_obj.key} done", style="green")
@@ -82,6 +82,6 @@ def upload_file(bucket: str, key: str, file: str):
         try:
             s3_obj = s3.bucket.put(bucket, key, file)
         except Exception as e:
-            console.log(f"Failed to upload file: {e}", style="red")
+            console.log(f"🔥 Failed to upload file: {e}", style="red")
         else:
-            console.log(f"Upload file to [b]{s3_obj.bucket}:{s3_obj.key}[/b] successfully", style="green")
+            console.log(f"🚀 Upload file to [b]{s3_obj.bucket}:{s3_obj.key}[/b] successfully", style="green")
