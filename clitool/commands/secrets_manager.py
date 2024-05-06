@@ -73,26 +73,26 @@ def upsert(secret_id: str, secret_string: str):
     if existing_secret:
         if diff := rich_diff(existing_secret.secret_string, secret_string):
             console.print(diff)
-            if click.confirm(f"Do you want to update the secret {secret_id}?", abort=True, default=True):
-                with console.status(f"Updating [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
-                    try:
-                        secret = secretsmanager.update_secret(secret_id, secret_string)
-                    except Exception as e:
-                        console.log(f"Failed to update key: {e}", style="red")
-                    else:
-                        console.print(secret.extract(), f"Updated [b]{secret_id}[/b] successfully.")
+            click.confirm(f"Do you want to update the secret {secret_id}?", abort=True, default=True)
+            with console.status(f"Updating [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+                try:
+                    secret = secretsmanager.update_secret(secret_id, secret_string)
+                except Exception as e:
+                    console.log(f"Failed to update key: {e}", style="red")
+                else:
+                    console.print(secret.extract(), f"Updated [b]{secret_id}[/b] successfully.")
         else:
             console.log("No changes detected.")
 
     else:
-        if click.confirm("Do you want to create a new secret?", abort=True, default=True):
-            with console.status(f"Creating [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
-                try:
-                    secret = secretsmanager.create_secret(secret_id, secret_string)
-                except Exception as e:
-                    console.log(f"Failed to update key: {e}", style="red")
-                else:
-                    console.print(secret.extract(), f"Created [b]{secret_id}[/b] successfully.")
+        click.confirm("Do you want to create a new secret?", abort=True, default=True)
+        with console.status(f"Creating [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+            try:
+                secret = secretsmanager.create_secret(secret_id, secret_string)
+            except Exception as e:
+                console.log(f"Failed to update key: {e}", style="red")
+            else:
+                console.print(secret.extract(), f"Created [b]{secret_id}[/b] successfully.")
 
 
 @cli.command()
@@ -106,11 +106,11 @@ def delete(secret_id: str):
         raise click.Abort()
     console.print(secret.extract())
 
-    if click.confirm(f"Are you sure you want to delete the secret {secret_id}?", abort=True, default=False):
-        with console.status(f"Deleting [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
-            try:
-                secretsmanager.delete_secret(secret_id)
-            except Exception as e:
-                console.log(f"Failed to delete key: {e}", style="red")
-            else:
-                console.print(f"Deleted [b]{secret_id}[/b] successfully.")
+    click.confirm(f"Are you sure you want to delete the secret {secret_id}?", abort=True, default=False)
+    with console.status(f"Deleting [b][cyan]{secret_id}[/cyan][/b] key ...", spinner="dots"):
+        try:
+            secretsmanager.delete_secret(secret_id)
+        except Exception as e:
+            console.log(f"Failed to delete key: {e}", style="red")
+        else:
+            console.print(f"Deleted [b]{secret_id}[/b] successfully.")
