@@ -5,7 +5,7 @@ from rich import pretty, traceback
 
 from clitool import commands
 from clitool.cache import cache
-from clitool.commands.base import tree
+from clitool.commands.base import config, tree
 from clitool.services import SessionService
 from clitool.types.session import Profile
 
@@ -18,7 +18,9 @@ def install_context(ctx: click.Context):
         session.switch_profile(profile.name, profile.region)
         # if credentials has been expired, refresh it
         if profile.credentials.is_expired():
-            ctx.invoke(commands.session.refresh_token)
+            from clitool.commands.session import refresh_token
+
+            ctx.invoke(refresh_token)
         else:
             session.set_credentials(profile.credentials)
 
@@ -46,6 +48,7 @@ def main():
     def add_default_command(command):
         if isinstance(command, Shell):
             command.add_command(tree)
+            command.add_command(config)
             for sub_command in command.commands.values():
                 add_default_command(sub_command)
         return command

@@ -3,7 +3,7 @@ import re
 import click
 from click_shell import shell
 
-from clitool.commands.base import validate_required_value
+from clitool.commands.base import validate_profile, validate_region
 from clitool.console import console
 from clitool.constants import AWS_DEFAULT_SESSION_PROFILE
 from clitool.services import SessionService
@@ -15,29 +15,6 @@ MFA_ARN_PATTERN = r"(^arn:aws:iam::\d+:mfa/[\w\-_]+$)|(^\d{6,}$)"
 #  Create them in the cli.py then inject them into the commands.
 #  Do the same for the other services.
 session = SessionService()
-
-
-# Validators ------------------------------------------------------------------
-def validate_profile(ctx=None, param=None, name="") -> str:
-    name = name.strip(" \n")
-    profiles = session.list_profiles()
-    profile_names = [profile.name for profile in profiles.items]
-
-    # if profile_name is not None, check if it exists in the list of profiles
-    # else try to get the profile from cache
-    if name == "":
-        if cached_profile := ctx.obj.get("profile"):
-            return validate_profile(ctx, param, cached_profile.arn)
-    elif name in profile_names:
-        return name
-    else:
-        console.clear()
-        console.log(f"Profile(name='{name}') not found", style="yellow")
-
-    # if cache is empty or profile is not found, prompt the user to choose a profile
-    profile_table = ProfileTable(items=profiles.items, columns=["name", "region"])
-    console.print_table(profile_table)
-    return validate_profile(ctx, param, click.prompt("Please choice a profile name"))
 
 
 # CLI commands ---------------------------------------------------------------
@@ -97,7 +74,7 @@ def switch_profile(name: str):
 
         console.log(f"Switched to {profile}")
         session.store_aws_config_file(profile, AWS_DEFAULT_SESSION_PROFILE)
-        console.log(f"Profile [b]{AWS_DEFAULT_SESSION_PROFILE}[/b] stored in ~/.aws/credentials", style="green")
+        console.log(f"✅ Profile [b]{AWS_DEFAULT_SESSION_PROFILE}[/b] stored in ~/.aws/credentials", style="green")
 
 
 @cli.command(help="Refresh the session token.")
@@ -122,11 +99,11 @@ def refresh_token():
 
             session.set_credentials(credentials)
             session.store_aws_config_file(session.profile, AWS_DEFAULT_SESSION_PROFILE)
-            console.log(f"Profile [b]{AWS_DEFAULT_SESSION_PROFILE}[/b] has been refreshed", style="green")
+            console.log(f"✅ Profile [b]{AWS_DEFAULT_SESSION_PROFILE}[/b] has been refreshed", style="green")
 
 
 @cli.command(help="Change region.")
-@click.argument("region", default="", required=False, callback=validate_required_value)
+@click.argument("region", default="", required=False, callback=validate_region)
 def change_region(region: str):
     """Change region."""
     # if the current region is the same with passed region, do nothing
@@ -140,4 +117,4 @@ def change_region(region: str):
                 console.log(f"🔥 Failed to change region: {e}", style="red")
             else:
                 console.print(profile.extract())
-                console.log(f"Region changed to {region}", style="green")
+                console.log(f"✅ Region changed to {region}", style="green")

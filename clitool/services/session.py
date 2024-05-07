@@ -124,12 +124,12 @@ class SessionService(metaclass=SingletonMeta):
         if region not in AWS_REGIONS:
             raise ValueError(f"Region {region} is not available")
 
-        response = self.session.client("account").list_regions(
-            RegionOptStatusContains=["ENABLED", "ENABLED_BY_DEFAULT"]
-        )
-        enabled_regions = {item["RegionName"] for item in response.get("Regions", [])}
-        if region not in enabled_regions:
-            raise ValueError(f"Region {region} is not enabled")
+        # response = self.session.client("account").list_regions(
+        #     RegionOptStatusContains=["ENABLED", "ENABLED_BY_DEFAULT"]
+        # )
+        # enabled_regions = {item["RegionName"] for item in response.get("Regions", [])}
+        # if region not in enabled_regions:
+        #     raise ValueError(f"Region {region} is not enabled")
 
         # change the region
         self.profile.region = region
